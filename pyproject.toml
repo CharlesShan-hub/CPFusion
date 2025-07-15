@@ -1,0 +1,26 @@
+[project]
+name = "cpfusion"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision",
+    "torchmetrics",
+    "tensorboard",
+    "kornia",
+    "seaborn",
+    "albumentations",
+    "click",
+    "einops",
+    "pycocotools",
+    "scikit-image",
+    "scikit-learn",
+    "tqdm",
+    "timm",
+    "wandb",
+    "visdom",
+    "matplotlib",
+    "cslib>0.2"
+]
