@@ -58,7 +58,7 @@ def main(**kwargs):
         detail_x_offset, detail_y_offset = example_img.width - window_size[0], example_img.height - window_size[1]
     else:
         raise ValueError('`corner` can only be NW, NE, SW, SE')
-
+    
     # Load images
     images = []
     detail_images = []
@@ -80,10 +80,10 @@ def main(**kwargs):
         for detail_img in [ir_detail_img, vis_detail_img] + fused_detail_imgs:
             draw_detail = ImageDraw.Draw(detail_img)
             draw_detail.rectangle(((0,0), detail_img.size), outline='red',width=opts.thickness)
-            
+        
         images.append([ir_img, vis_img] + fused_imgs)
         detail_images.append([ir_detail_img, vis_detail_img] + fused_detail_imgs)
-
+    
     # Calculate total width and height
     total_width = (len(opts.algorithms)+2) * example_img.width
     total_height = len(opts.img_id) * example_img.height
@@ -102,7 +102,18 @@ def main(**kwargs):
     # Save and display the new image
     output_path = Path(opts.res_dir) / opts.res_name
     new_img.save(output_path,)
-    plt.imshow(new_img)
+    try:
+        # plt.figure(figsize=figsize)
+        plt.imshow(new_img)
+        print("uv cannot use `TkAgg` backends! ")
+        # https://github.com/astral-sh/uv/issues/6893
+    except:
+        import matplotlib
+        # other backends:
+        # https://matplotlib.org/stable/users/explain/figure/backends.html
+        matplotlib.use('macosx')
+        # plt.figure(figsize=figsize)
+        plt.imshow(new_img)
     plt.axis('off')
     plt.show()
 
