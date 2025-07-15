@@ -21,3 +21,10 @@ chmod a+x ./inference.sh
 ./inference.sh
 ```
 
+4. Run dataset
+```bash
+cd samples
+chmod a+x./dataset.sh
+./dataset.sh
+```
+

@@ -12,7 +12,7 @@
 
 # Run Script
 
-PYTHON_SCRIPT="../cpfusion/inference.py"
+PYTHON_SCRIPT="./cpfusion/inference.py"
 
 python $PYTHON_SCRIPT \
     --layer 4

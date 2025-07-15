@@ -24,13 +24,22 @@ def _c(image: torch.Tensor) -> torch.Tensor:
     res[:,1:3,:,:] = 128.0
     return to_tensor(ycbcr_to_rgb(res))
 
-def image_init(ir: torch.Tensor, vis: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def image_init(ir: torch.Tensor, vis: torch.Tensor, debug: bool = False) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     assert ir.shape[1] == 1 and ir.ndim == 4 and vis.ndim == 4
     if vis.shape[1] == 1:
         vis = to_tensor(gray_to_rgb(vis))
     vis_ycbcr = to_tensor(rgb_to_ycbcr(vis))
     vis_y = vis_ycbcr[:, :1, :, :]
     ir_y = to_tensor(rgb_to_ycbcr(gray_to_rgb(ir)))[:, :1, :, :]
+    if debug:
+        glance(
+            [_c(vis_y), _c(ir_y)],
+            title=['VIS Y', 'IR Y'],
+            shape=(1,3), 
+            suptitle = 'Image Initialization',
+            each_save=True,
+            each_save_dir='./glance_outputs/origin'
+        )
     return vis_ycbcr, vis_y, ir_y
 
 def apple_msd(ir_y: torch.Tensor, vis_y: torch.Tensor, layer: int, msd_method: str, debug: bool) -> tuple[Union[Laplacian, Contrust], Union[Laplacian, Contrust]]:
@@ -46,7 +55,11 @@ def apple_msd(ir_y: torch.Tensor, vis_y: torch.Tensor, layer: int, msd_method: s
         glance(
             [_c(ir_pyr.recon), _c(vis_pyr.recon), _c(ir_y), _c(vis_y)], 
             title=['IR rebuild', 'VIS rebuild', 'IR', 'VIS'],
-            shape=(2,2), suptitle = 'Multi-Scale Decomposition (result)')
+            shape=(2,2), 
+            suptitle = 'Multi-Scale Decomposition (result)',
+            each_save=True,
+            each_save_dir='./glance_outputs/msd'
+            )
     return ir_pyr, vis_pyr
 
 def get_base(ir_pyr: Union[Laplacian, Contrust], vis_pyr: Union[Laplacian, Contrust], layer: int, debug: bool) -> tuple[torch.Tensor, torch.Tensor]:
@@ -56,7 +69,10 @@ def get_base(ir_pyr: Union[Laplacian, Contrust], vis_pyr: Union[Laplacian, Contr
         glance(
             [torch.abs(_c(i)) for i in ir_base] + [torch.abs(_c(i)) for i in vis_base],
             title=[f'Ir Base L{i+1}' for i in range(layer+1)] + [f'Vis Base L{i+1}' for i in range(layer+1)],
-            shape=(2,layer+1),suptitle = 'Multi-Scale Decomposition (Base)'
+            shape=(2,layer+1),
+            suptitle = 'Multi-Scale Decomposition (Base)',
+            each_save=True,
+            each_save_dir='./glance_outputs/base'
         )
     ir_base = torch.cat(msd_align(ir_base),dim=1)
     vis_base = torch.cat(msd_align(vis_base),dim=1)
@@ -69,9 +85,11 @@ def get_detail(ir_pyr: Union[Laplacian, Contrust], vis_pyr: Union[Laplacian, Con
         glance(
             [torch.abs(_c(i)) for i in ir_detail] + [torch.abs(_c(i)) for i in vis_detail],
             title=[f'Ir Detail L{i+1}' for i in range(layer)] + [f'Vis Detail L{i+1}' for i in range(layer)],
-            shape=(2,layer),suptitle = 'Multi-Scale Decomposition (Detail)'
+            shape=(2,layer),
+            suptitle = 'Multi-Scale Decomposition (Detail)',
+            each_save=True,
+            each_save_dir='./glance_outputs/detail'
         )
-    
     ir_detail = torch.cat(msd_align(ir_detail),dim=1)
     vis_detail = torch.cat(msd_align(vis_detail),dim=1)
     return ir_detail, vis_detail
@@ -84,7 +102,9 @@ def base_layer_fuse(ir_base: torch.Tensor, vis_base: torch.Tensor, fusion_method
             glance(
                 [torch.abs(_c(fused_base[:,i:i+1,:,:])) for i in range(layer)],
                 title=[f'f_b{i+1} wcc={wcc[0,i:i+1,0,0].item()}' for i in range(layer)],
-                suptitle = 'correlation coefficient weights'
+                suptitle = 'CC+MAX correlation coefficient weights',
+                each_save=True,
+                each_save_dir='./glance_outputs/cc_max'
             )
     elif fusion_method == 'CC':
         wcc = correlation_coefficient_weights(ir_base, vis_base)
@@ -93,7 +113,9 @@ def base_layer_fuse(ir_base: torch.Tensor, vis_base: torch.Tensor, fusion_method
             glance(
                 [torch.abs(_c(fused_base[:,i:i+1,:,:])) for i in range(layer)],
                 title=[f'f_b{i+1} wcc={wcc[0,i:i+1,0,0].item()}' for i in range(layer)],
-                suptitle = 'correlation coefficient weights'
+                suptitle = 'CC correlation coefficient weights',
+                each_save=True,
+                each_save_dir='./glance_outputs/cc'
             )
     elif fusion_method == 'MAX':
         fused_base = torch.max(ir_base, vis_base)
@@ -101,7 +123,9 @@ def base_layer_fuse(ir_base: torch.Tensor, vis_base: torch.Tensor, fusion_method
             glance(
                 [torch.abs(_c(fused_base[:,i:i+1,:,:])) for i in range(layer)],
                 title=[f'f_b{i+1}' for i in range(layer)],
-                suptitle = 'max'
+                suptitle = 'max',
+                each_save=True,
+                each_save_dir='./glance_outputs/max'
             )
     else:
         raise ValueError(f'Unknown fusion method: {fusion_method}')
@@ -127,7 +151,9 @@ def detail_layer_fuse(ir_detail: torch.Tensor, vis_detail: torch.Tensor, attensi
                 [f'ir with Sim l{i+1}' for i in range(layer)]+\
                 [f'vis l{i+1}' for i in range(layer)]+\
                 [f'vis with Sim l{i+1}' for i in range(layer)],
-                shape=(4,layer), suptitle = 'Attension (Detail)', tight_layout=True
+                shape=(4,layer), suptitle = 'Attension (Detail)', tight_layout=True,
+                each_save=True,
+                each_save_dir='./glance_outputs/attension'
             )
     else:
         ir_detail_enhanced = ir_detail
@@ -157,7 +183,7 @@ def fusion(
         attension: str = ['SimAM','DSimAM','None'][1],
     ) -> torch.Tensor:
     # 得到Y通道
-    vis_ycbcr, vis_y, ir_y = image_init(ir, vis)
+    vis_ycbcr, vis_y, ir_y = image_init(ir, vis, debug)
 
     # 多尺度分解
     ir_pyr, vis_pyr = apple_msd(ir_y, vis_y, layer, msd_method, debug)
@@ -190,22 +216,26 @@ def main(**kwargs) -> None:
     opts = Options('CPFusion', kwargs)
     opts.present()
 
+    image_index = 190015
+    ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/llvip/infrared/test/{image_index}.jpg')
+    vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/llvip/visible/test/{image_index}.jpg')
+
     # image_index = 48
     # ir = path_to_gray('/Users/kimshan/Public/project/paper/ir_250423.jpg')
     # vis = path_to_rgb('/Users/kimshan/Public/project/paper/vis_250423.jpg')
     # ir = path_to_gray('/Users/kimshan/Public/project/paper/ir_010379.jpg')
     # vis = path_to_rgb('/Users/kimshan/Public/project/paper/vis_010379.jpg')
 
-    image_index = 2
+    # image_index = 2
     # ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/tno/tno/ir/{image_index}.png')
     # vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/tno/tno/vis/{image_index}.png')
-    ir = path_to_gray(f'/Users/kimshan/Public/data/vision/torchvision/tno/tno/lwir/{image_index}.png')
-    vis = path_to_gray(f'/Users/kimshan/Public/data/vision/torchvision/tno/tno/vis/{image_index}.png')
+    # ir = path_to_gray(f'/Users/kimshan/Public/data/vision/torchvision/tno/tno/lwir/{image_index}.png')
+    # vis = path_to_gray(f'/Users/kimshan/Public/data/vision/torchvision/tno/tno/vis/{image_index}.png')
     
     ir = to_tensor(ir).unsqueeze(0).to(opts.device)
     vis = to_tensor(vis).unsqueeze(0).to(opts.device)
 
-    glance([ir,vis,fusion(ir, vis, kwargs['layer'], debug=True)],title=['ir','vis','fused'],auto_contrast=False,clip=True)
+    glance([ir,vis,fusion(ir, vis, kwargs['layer'], debug=True)],title=['ir','vis','fused'],auto_contrast=False,clip=True,each_save=True,each_save_dir="./glance_outputs/final")
     # save_array_to_img(fusion(ir, vis, kwargs['layer'], debug=False), filename=f'/Volumes/Charles/data/vision/torchvision/tno/tno/fused/cpfusion/{image_index}.png')
 
 @click.command()
