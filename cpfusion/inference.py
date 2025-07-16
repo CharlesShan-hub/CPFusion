@@ -33,8 +33,8 @@ def image_init(ir: torch.Tensor, vis: torch.Tensor, debug: bool = False) -> tupl
     ir_y = to_tensor(rgb_to_ycbcr(gray_to_rgb(ir)))[:, :1, :, :]
     if debug:
         glance(
-            [_c(vis_y), _c(ir_y)],
-            title=['VIS Y', 'IR Y'],
+            [vis, _c(vis_y), _c(ir_y)],
+            title=['VIS', 'VIS Y', 'IR Y'],
             shape=(1,3), 
             suptitle = 'Image Initialization',
             each_save=True,
@@ -99,6 +99,13 @@ def base_layer_fuse(ir_base: torch.Tensor, vis_base: torch.Tensor, fusion_method
         wcc = correlation_coefficient_weights(ir_base, vis_base)
         fused_base = _base_layer_fuse(ir_base, vis_base, wcc)
         if debug:
+            # glance(
+            #     [torch.abs(_c(wcc[:,i:i+1,:,:])) for i in range(layer)],
+            #     title=[f'f_b{i+1} wcc={wcc[0,i:i+1,0,0].item()}' for i in range(layer)],
+            #     suptitle = 'wcc',
+            #     each_save=True,
+            #     each_save_dir='./glance_outputs/wcc'
+            # )
             glance(
                 [torch.abs(_c(fused_base[:,i:i+1,:,:])) for i in range(layer)],
                 title=[f'f_b{i+1} wcc={wcc[0,i:i+1,0,0].item()}' for i in range(layer)],
@@ -160,7 +167,16 @@ def detail_layer_fuse(ir_detail: torch.Tensor, vis_detail: torch.Tensor, attensi
         vis_detail_enhanced = vis_detail
 
     # 细节层融合
-    return _detail_layer_fuse(ir_detail_enhanced, vis_detail_enhanced)
+    fused_detail = _detail_layer_fuse(ir_detail_enhanced, vis_detail_enhanced)
+    if debug:
+        glance(
+            [torch.abs(_c(fused_detail[:,i:i+1,:,:])) for i in range(layer)],
+            title=[f'f_detail_{i+1}' for i in range(layer)],
+            shape=(1,layer), suptitle = 'Fusion (Detail)', tight_layout=True,
+            each_save=True,
+            each_save_dir='./glance_outputs/fusion_detail'
+        )
+    return fused_detail
 
 def reconstruction(fused_base: torch.Tensor, fused_detail: torch.Tensor, ir_pyr: Union[Laplacian, Contrust], vis_ycbcr: torch.Tensor) -> torch.Tensor:
     fused_base = msd_resample(fused_base)
