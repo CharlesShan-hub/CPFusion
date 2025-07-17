@@ -275,6 +275,68 @@ def test_tno(**kwargs) -> None:
 
 
 @click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/tno/tno")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_tno_ablation_pam(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion without PAM TNO', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'ir').glob("*.png"):
+        ir = to_tensor(path_to_gray(i)).to(opts.device)
+        vis = path_to_rgb(Path(opts.p) / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, attension='None')
+        name = Path(opts.p) / 'fused' / 'cpfusion_wp' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/tno/tno")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_tno_ablation_cc(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion CC TNO', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'ir').glob("*.png"):
+        ir = to_tensor(path_to_gray(i)).to(opts.device)
+        vis = path_to_rgb(Path(opts.p) / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='CC')
+        name = Path(opts.p) / 'fused' / 'cpfusion_cc' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/tno/tno")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_tno_ablation_max(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion MAX TNO', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'ir').glob("*.png"):
+        ir = to_tensor(path_to_gray(i)).to(opts.device)
+        vis = path_to_rgb(Path(opts.p) / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='MAX')
+        name = Path(opts.p) / 'fused' / 'cpfusion_max' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
 @click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
 @click.option("--layer", type=int, default=4)
 @click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
@@ -293,7 +355,145 @@ def test_llvip(**kwargs) -> None:
         print(f"Saving {name}")
         save_array_to_img(fused, name, True)
 
+    
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_llvip(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion LLVIP', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'infrared' / 'test').glob("*.jpg"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'visible' / 'test' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False)
+        name = Path(opts.p) / 'fused' / 'cpfusion' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_llvip_ablation_pam(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion Withoud PAM Ablation LLVIP', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'infrared' / 'test').glob("*.jpg"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'visible' / 'test' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, attension='None')
+        name = Path(opts.p) / 'fused' / 'cpfusion_wp' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_llvip_ablation_max(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion MAX ablation LLVIP', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'infrared' / 'test').glob("*.jpg"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'visible' / 'test' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='MAX')
+        name = Path(opts.p) / 'fused' / 'cpfusion_max' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_llvip_ablation_cc(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion CC ablation LLVIP', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'infrared' / 'test').glob("*.jpg"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'visible' / 'test' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='CC')
+        name = Path(opts.p) / 'fused' / 'cpfusion_cc' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+
+@click.command()
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def ablation(**kwargs):
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion Ablation', kwargs)
+
+    image_index = 52
+    ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/tno/tno/ir/{image_index}.png')
+    vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/tno/tno/vis/{image_index}.png')
+    ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+    vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+    fused_cc_tno = fusion(ir, vis, kwargs['layer'], fusion_method='CC', debug=False)
+    fused_max_tno = fusion(ir, vis, kwargs['layer'], fusion_method='MAX', debug=False)
+    fused_cc_max_tno = fusion(ir, vis, kwargs['layer'], fusion_method='CC+MAX', debug=False)
+    fused_without_pam_tno = fusion(ir, vis, kwargs['layer'], attension='None', debug=False)
+    fused_pam_tno = fusion(ir, vis, kwargs['layer'], attension='DSimAM', debug=False)
+
+    llvip_index = 190190
+    ir_llvip = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/llvip/infrared/test/{llvip_index}.jpg')
+    vis_llvip = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/llvip/visible/test/{llvip_index}.jpg')
+    ir_llvip = to_tensor(ir_llvip).unsqueeze(0).to(opts.device)
+    vis_llvip = to_tensor(vis_llvip).unsqueeze(0).to(opts.device)
+    fused_cc_llvip = fusion(ir_llvip, vis_llvip, kwargs['layer'], fusion_method='CC', debug=False)
+    fused_max_llvip = fusion(ir_llvip, vis_llvip, kwargs['layer'], fusion_method='MAX', debug=False)
+    fused_cc_max_llvip = fusion(ir_llvip, vis_llvip, kwargs['layer'], fusion_method='CC+MAX', debug=False)
+    fused_without_pam_llvip = fusion(ir_llvip, vis_llvip, kwargs['layer'], attension='None', debug=False)
+    fused_pam_llvip = fusion(ir_llvip, vis_llvip, kwargs['layer'], attension='DSimAM', debug=False)
+
+    glance(
+            [fused_cc_tno, fused_max_tno, fused_cc_max_tno]+\
+            [fused_cc_llvip, fused_max_llvip, fused_cc_max_llvip],
+            shape = (2,3),
+            each_save = True,
+            each_save_dir = "./glance_outputs/ablantion/1"
+        )
+
+    glance(
+            [fused_without_pam_tno, fused_pam_tno]+\
+            [fused_without_pam_llvip, fused_pam_llvip],
+            shape = (2,2),
+            each_save = True,
+            each_save_dir = "./glance_outputs/ablantion/2"
+        )
+
+    
+
 if __name__ == '__main__':
-    main()
+    # main()
     # test_tno()
     # test_llvip()
+    # ablation()
+    # test_tno_ablation_pam()
+    # test_tno_ablation_cc()
+    # test_tno_ablation_max()
+    # test_llvip_ablation_pam()
+    # test_llvip_ablation_cc()
+    test_llvip_ablation_max()
