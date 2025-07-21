@@ -53,6 +53,7 @@ def correlation_coefficient_weights(X, Y):
 
 def _base_layer_fuse(X, Y, wcc):
     weight = 1.5 ** ((wcc + 1) / 2)
+    weight = torch.clamp(weight, 0, 1) # Add this
     fused = torch.zeros_like(X)
     # print(weight, 1-weight)
     weighted_X = weight * X

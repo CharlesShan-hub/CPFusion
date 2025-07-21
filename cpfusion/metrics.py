@@ -24,16 +24,15 @@ default_db_name = "metrics.db"
 # 1. Calculare all images in each fused_dir
 defaulf_img_id = ()
 # 2. Calculare for specified images
-# defaulf_img_id = ('190001','190003')
+defaulf_img_id = ('190001','190002','190003','190004','190005')
 # defaulf_img_id = ('39',)
 
 # Fusion Algorithms
 # 1. `fused_dir` is into one algorithm
 # default_algorithms = () 
 # 2. `fused_dir` is the parent dir of all algorithms
-# default_algorithms = ('GTF','VSMWLS','HMSD','SDCFusion','DATFuse','SceneFuse')
 # default_algorithms = ('cpfusion','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
-default_algorithms = ('cpfusion_max', 'cpfusion_wp', 'cpfusion_cc')
+default_algorithms = ('cpfusion',)
 
 # Metrics
 # default_metrics = ['pfe']
@@ -71,7 +70,7 @@ default_metrics = [
 @click.option('--db_dir', default=default_db_dir, help='Path to save database file.')
 @click.option('--db_name', default=default_db_name, help='Name of database file.')
 @click.option('--device', default='auto', help='auto | cuda | mps | cpu')
-@click.option('--jump', default=True, help='Jump Metrics that calculated before.')
+@click.option('--jump', default=False, help='Jump Metrics that calculated before.')
 def main(**kwargs):
     kwargs['device'] = get_device(kwargs['device'])
     opts = Options('Compute Metrics',kwargs)
