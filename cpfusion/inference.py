@@ -1,5 +1,6 @@
 import click
 from typing import Union
+from numpy import save
 import torch
 from cslib.utils.image import to_tensor, rgb_to_ycbcr, gray_to_rgb, ycbcr_to_rgb, save_array_to_img, path_to_gray, path_to_rgb
 from cslib.utils import get_device, Options, glance
@@ -221,13 +222,35 @@ def fusion(
     
     return fused
 
+
 @click.command()
+@click.option("--ir_path", type=str)
+@click.option("--vis_path", type=str)
 @click.option("--layer", type=int, default=4)
 @click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
 @click.option("--fusion_strategy", type=str, default=['CC+MAX','CC','MAX'][0])
 @click.option("--pam_module", type=bool, default=True)
 @click.option("--device", type=str, default='auto')
 def main(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion', kwargs)
+    opts.present()
+
+    ir = to_tensor(path_to_gray(opts.ir_path)).unsqueeze(0).to(opts.device)
+    vis = to_tensor(path_to_rgb(opts.vis_path)).unsqueeze(0).to(opts.device)
+    fused = fusion(ir, vis, kwargs['layer'], debug=False)
+
+    glance([ir,vis,fused],title=['ir','vis','fused'],auto_contrast=False,clip=True)
+    save_array_to_img(fused, Path(opts.vis_path).parent.parent/'fused'/Path(opts.vis_path).name)
+
+
+@click.command()
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--fusion_strategy", type=str, default=['CC+MAX','CC','MAX'][0])
+@click.option("--pam_module", type=bool, default=True)
+@click.option("--device", type=str, default='auto')
+def test(**kwargs) -> None:
     kwargs['device'] = get_device(kwargs['device'])
     opts = Options('CPFusion', kwargs)
     opts.present()
@@ -467,9 +490,10 @@ def ablation(**kwargs):
     
 
 if __name__ == '__main__':
-    # main()
+    main()
+    # test()
     # test_tno()
-    test_llvip()
+    # test_llvip()
     # ablation()
     # test_tno_ablation_pam()
     # test_tno_ablation_cc()

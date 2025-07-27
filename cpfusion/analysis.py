@@ -36,7 +36,8 @@ default_img_id = ()
 # 2. `fused_dir` is the parent dir of all algorithms
 # default_algorithms = ('SceneFuse','GTF','SDCFusion','DATFuse','VSMWLS','HMSD')
 # default_algorithms = ('cpfusion','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
-default_algorithms = ('cpfusion','cpfusion_wp','cpfusion_cc','cpfusion_max','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
+default_algorithms = ('cpfusion','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
+# default_algorithms = ('cpfusion','cpfusion_wp','cpfusion_cc','cpfusion_max','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
 # default_algorithms = ('cpfusion','cpfusion_max','cpfusion_cc')
 
 # Metrics

@@ -1,7 +1,7 @@
 [project]
 name = "cpfusion"
 version = "0.1.0"
-description = "Add your description here"
+description = "Enhanced Infrared and Visible Image Fusion via Correlation-Driven Rules and Parameter-Free Attention Mechanism"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
