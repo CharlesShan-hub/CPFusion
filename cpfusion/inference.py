@@ -380,6 +380,46 @@ def test_llvip(**kwargs) -> None:
 
 
 @click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/msrs/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_msrs(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion MSRS', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'test' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'test' / 'vi' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False)
+        name = Path(opts.p) / 'test' / 'fused' / 'cpfusion' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/m3fd/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_m3fd(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion M3FD', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'fusion' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'fusion' / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False)
+        name = Path(opts.p) / 'fusion' / 'fused' / 'cpfusion' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
 @click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
 @click.option("--layer", type=int, default=4)
 @click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
@@ -490,10 +530,12 @@ def ablation(**kwargs):
     
 
 if __name__ == '__main__':
-    main()
+    # main()
     # test()
     # test_tno()
     # test_llvip()
+    # test_msrs()
+    test_m3fd()
     # ablation()
     # test_tno_ablation_pam()
     # test_tno_ablation_cc()

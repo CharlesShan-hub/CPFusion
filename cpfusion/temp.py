@@ -6,11 +6,11 @@ from cslib.utils.config import Options
 from cslib.datasets.fusion import GeneralFusion
 from cslib.metrics.fusion.utils import Database
 
-# Paths - llvip
-default_ir_dir = "/Volumes/Charles/data/vision/torchvision/llvip/infrared/test"
-default_vis_dir = "/Volumes/Charles/data/vision/torchvision/llvip/visible/test"
-default_fused_dir = "/Volumes/Charles/data/vision/torchvision/llvip/fused"
-default_db_dir = "/Volumes/Charles/data/vision/torchvision/llvip/fused"
+# Paths - m3fd
+default_ir_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/ir"
+default_vis_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/vis"
+default_fused_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/fused"
+default_db_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/fused"
 default_db_name = "metrics.db"
 
 # Paths - tno
@@ -18,14 +18,7 @@ default_db_name = "metrics.db"
 # default_vis_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/vis"
 # default_fused_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/fused"
 # default_db_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/fused"
-# default_db_name = "metrics.db"
-
-# Path - msrs
-# default_ir_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/ir"
-# default_vis_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/vi"
-# default_fused_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/fused"
-# default_db_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/fused"
-# default_db_name = "metrics.db"
+# default_db_name = "comofusion.db"
 
 # Fusion Images
 # 1. Calculare all images in each fused_dir
@@ -39,7 +32,7 @@ defaulf_img_id = ()
 # default_algorithms = () 
 # 2. `fused_dir` is the parent dir of all algorithms
 # default_algorithms = ('cpfusion','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
-default_algorithms = ('crossfuse',)
+default_algorithms = ('cpfusion',)
 
 # Metrics
 # default_metrics = ['pfe']
@@ -73,11 +66,11 @@ default_metrics = [
 @click.option('--algorithms', default=default_algorithms, multiple=True, help='compute metrics for multiple fusion algorithms')
 @click.option('--img_id', default=defaulf_img_id, multiple=True, help='compute metrics for specified images')
 @click.option('--metrics', default=default_metrics, multiple=True)
-@click.option('--suffix', default="jpg")
+@click.option('--suffix', default="png")
 @click.option('--db_dir', default=default_db_dir, help='Path to save database file.')
 @click.option('--db_name', default=default_db_name, help='Name of database file.')
 @click.option('--device', default='auto', help='auto | cuda | mps | cpu')
-@click.option('--jump', default=True, help='Jump Metrics that calculated before.')
+@click.option('--jump', default=False, help='Jump Metrics that calculated before.')
 def main(**kwargs):
     kwargs['device'] = get_device(kwargs['device'])
     opts = Options('Compute Metrics',kwargs)
