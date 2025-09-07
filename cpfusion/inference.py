@@ -1,6 +1,5 @@
 import click
 from typing import Union
-from numpy import save
 import torch
 from cslib.utils.image import to_tensor, rgb_to_ycbcr, gray_to_rgb, ycbcr_to_rgb, save_array_to_img, path_to_gray, path_to_rgb
 from cslib.utils import get_device, Options, glance
@@ -15,6 +14,10 @@ from pathlib import Path
 __all__ = [
     'fusion'
 ]
+
+#########################################################################################################
+#                                               Fusion                                                  #
+#########################################################################################################
 
 def _c(image: torch.Tensor) -> torch.Tensor:
     ''' 将灰度图转换为RGB图, 为了方便可视化
@@ -244,6 +247,10 @@ def main(**kwargs) -> None:
     save_array_to_img(fused, Path(opts.vis_path).parent.parent/'fused'/Path(opts.vis_path).name)
 
 
+#########################################################################################################
+#                                         Test Single Image                                             #
+#########################################################################################################
+
 @click.command()
 @click.option("--layer", type=int, default=4)
 @click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
@@ -276,6 +283,11 @@ def test(**kwargs) -> None:
 
     glance([ir,vis,fusion(ir, vis, kwargs['layer'], debug=True)],title=['ir','vis','fused'],auto_contrast=False,clip=True,each_save=True,each_save_dir="./glance_outputs/final")
     # save_array_to_img(fusion(ir, vis, kwargs['layer'], debug=False), filename=f'/Volumes/Charles/data/vision/torchvision/tno/tno/fused/cpfusion/{image_index}.png')
+
+
+#########################################################################################################
+#                                              Test TNO                                                 #
+#########################################################################################################
 
 @click.command()
 @click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/tno/tno")
@@ -317,7 +329,6 @@ def test_tno_ablation_pam(**kwargs) -> None:
         save_array_to_img(fused, name, True)
 
 
-
 @click.command()
 @click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/tno/tno")
 @click.option("--layer", type=int, default=4)
@@ -336,7 +347,6 @@ def test_tno_ablation_cc(**kwargs) -> None:
         name = Path(opts.p) / 'fused' / 'cpfusion_cc' / i.name
         print(f"Saving {name}")
         save_array_to_img(fused, name, True)
-
 
 
 @click.command()
@@ -359,6 +369,10 @@ def test_tno_ablation_max(**kwargs) -> None:
         save_array_to_img(fused, name, True)
 
     
+#########################################################################################################
+#                                            Test LLVIP                                                 #
+#########################################################################################################
+
 @click.command()
 @click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
 @click.option("--layer", type=int, default=4)
@@ -375,46 +389,6 @@ def test_llvip(**kwargs) -> None:
         vis = to_tensor(vis).unsqueeze(0).to(opts.device)
         fused = fusion(ir, vis, kwargs['layer'], debug=False)
         name = Path(opts.p) / 'fused' / 'cpfusion' / i.name
-        print(f"Saving {name}")
-        save_array_to_img(fused, name, True)
-
-
-@click.command()
-@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/msrs/")
-@click.option("--layer", type=int, default=4)
-@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
-@click.option("--device", type=str, default='auto')
-def test_msrs(**kwargs) -> None:
-    kwargs['device'] = get_device(kwargs['device'])
-    opts = Options('CPFusion MSRS', kwargs)
-    opts.present()
-    for i in (Path(opts.p) / 'test' / 'ir').glob("*.png"):
-        ir = path_to_gray(i)
-        vis = path_to_rgb(Path(opts.p) / 'test' / 'vi' / i.name)
-        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
-        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
-        fused = fusion(ir, vis, kwargs['layer'], debug=False)
-        name = Path(opts.p) / 'test' / 'fused' / 'cpfusion' / i.name
-        print(f"Saving {name}")
-        save_array_to_img(fused, name, True)
-
-
-@click.command()
-@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/m3fd/")
-@click.option("--layer", type=int, default=4)
-@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
-@click.option("--device", type=str, default='auto')
-def test_m3fd(**kwargs) -> None:
-    kwargs['device'] = get_device(kwargs['device'])
-    opts = Options('CPFusion M3FD', kwargs)
-    opts.present()
-    for i in (Path(opts.p) / 'fusion' / 'ir').glob("*.png"):
-        ir = path_to_gray(i)
-        vis = path_to_rgb(Path(opts.p) / 'fusion' / 'vis' / i.name)
-        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
-        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
-        fused = fusion(ir, vis, kwargs['layer'], debug=False)
-        name = Path(opts.p) / 'fusion' / 'fused' / 'cpfusion' / i.name
         print(f"Saving {name}")
         save_array_to_img(fused, name, True)
 
@@ -459,7 +433,6 @@ def test_llvip_ablation_max(**kwargs) -> None:
         save_array_to_img(fused, name, True)
 
 
-
 @click.command()
 @click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
 @click.option("--layer", type=int, default=4)
@@ -480,6 +453,177 @@ def test_llvip_ablation_cc(**kwargs) -> None:
         save_array_to_img(fused, name, True)
 
 
+#########################################################################################################
+#                                            Test MSRS                                                  #
+#########################################################################################################
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/msrs/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_msrs(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion MSRS', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'test' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'test' / 'vi' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False)
+        name = Path(opts.p) / 'test' / 'fused' / 'cpfusion' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/msrs/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_msrs_ablation_pam(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion Withoud PAM Ablation MSRS', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'test' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'test' / 'vi' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, attension='None')
+        name = Path(opts.p) / 'test' / 'fused' / 'cpfusion_wp' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/msrs/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_msrs_ablation_max(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion MAX ablation MSRS', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'test' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'test' / 'vi' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='MAX')
+        name = Path(opts.p) / 'test' / 'fused' / 'cpfusion_max' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/msrs/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_msrs_ablation_cc(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion CC ablation MSRS', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'test' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'test' / 'vi' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='CC')
+        name = Path(opts.p) / 'test' / 'fused' / 'cpfusion_cc' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+#########################################################################################################
+#                                            Test M3FD                                                  #
+#########################################################################################################
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/m3fd/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_m3fd(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion M3FD', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'fusion' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'fusion' / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False)
+        name = Path(opts.p) / 'fusion' / 'fused' / 'cpfusion' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/m3fd/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_m3fd_ablation_pam(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion Withoud PAM Ablation M3FD', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'fusion' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'fusion' / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, attension='None')
+        name = Path(opts.p) / 'fusion' / 'fused' / 'cpfusion_wp' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/m3fd/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_m3fd_ablation_max(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion MAX ablation M3FD', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'fusion' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'fusion' / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='MAX')
+        name = Path(opts.p) / 'fusion' / 'fused' / 'cpfusion_max' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/m3fd/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_m3fd_ablation_cc(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion CC ablation M3FD', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'fusion' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'fusion' / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='CC')
+        name = Path(opts.p) / 'fusion' / 'fused' / 'cpfusion_cc' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+
+#########################################################################################################
+#                                          Ablation View                                                #
+#########################################################################################################
 
 @click.command()
 @click.option("--layer", type=int, default=4)
@@ -528,14 +672,13 @@ def ablation(**kwargs):
         )
 
     
-
 if __name__ == '__main__':
     # main()
     # test()
     # test_tno()
     # test_llvip()
     # test_msrs()
-    test_m3fd()
+    # test_m3fd()
     # ablation()
     # test_tno_ablation_pam()
     # test_tno_ablation_cc()
@@ -543,3 +686,9 @@ if __name__ == '__main__':
     # test_llvip_ablation_pam()
     # test_llvip_ablation_cc()
     # test_llvip_ablation_max()
+    # test_msrs_ablation_pam()
+    # test_msrs_ablation_cc()
+    # test_msrs_ablation_max()
+    # test_m3fd_ablation_pam()
+    # test_m3fd_ablation_cc()
+    # test_m3fd_ablation_max()

@@ -32,7 +32,7 @@ defaulf_img_id = ()
 # default_algorithms = () 
 # 2. `fused_dir` is the parent dir of all algorithms
 # default_algorithms = ('cpfusion','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
-default_algorithms = ('cpfusion',)
+default_algorithms = ('tardal',)
 
 # Metrics
 # default_metrics = ['pfe']
@@ -70,7 +70,7 @@ default_metrics = [
 @click.option('--db_dir', default=default_db_dir, help='Path to save database file.')
 @click.option('--db_name', default=default_db_name, help='Name of database file.')
 @click.option('--device', default='auto', help='auto | cuda | mps | cpu')
-@click.option('--jump', default=False, help='Jump Metrics that calculated before.')
+@click.option('--jump', default=True, help='Jump Metrics that calculated before.')
 def main(**kwargs):
     kwargs['device'] = get_device(kwargs['device'])
     opts = Options('Compute Metrics',kwargs)
