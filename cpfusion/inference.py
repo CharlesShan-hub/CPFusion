@@ -115,7 +115,7 @@ def base_layer_fuse(ir_base: torch.Tensor, vis_base: torch.Tensor, fusion_method
                 title=[f'f_b{i+1} wcc={wcc[0,i:i+1,0,0].item()}' for i in range(layer)],
                 suptitle = 'CC+MAX correlation coefficient weights',
                 each_save=True,
-                each_save_dir='./glance_outputs/cc_max'
+                each_save_dir='./assets/glance_outputs/cc_max'
             )
     elif fusion_method == 'CC':
         wcc = correlation_coefficient_weights(ir_base, vis_base)
@@ -126,7 +126,7 @@ def base_layer_fuse(ir_base: torch.Tensor, vis_base: torch.Tensor, fusion_method
                 title=[f'f_b{i+1} wcc={wcc[0,i:i+1,0,0].item()}' for i in range(layer)],
                 suptitle = 'CC correlation coefficient weights',
                 each_save=True,
-                each_save_dir='./glance_outputs/cc'
+                each_save_dir='./assets/glance_outputs/cc'
             )
     elif fusion_method == 'MAX':
         fused_base = torch.max(ir_base, vis_base)
@@ -136,7 +136,7 @@ def base_layer_fuse(ir_base: torch.Tensor, vis_base: torch.Tensor, fusion_method
                 title=[f'f_b{i+1}' for i in range(layer)],
                 suptitle = 'max',
                 each_save=True,
-                each_save_dir='./glance_outputs/max'
+                each_save_dir='./assets/glance_outputs/max'
             )
     else:
         raise ValueError(f'Unknown fusion method: {fusion_method}')
@@ -183,6 +183,9 @@ def detail_layer_fuse(ir_detail: torch.Tensor, vis_detail: torch.Tensor, attensi
     return fused_detail
 
 def reconstruction(fused_base: torch.Tensor, fused_detail: torch.Tensor, ir_pyr: Union[Laplacian, Contrust], vis_ycbcr: torch.Tensor) -> torch.Tensor:
+    # Add this -> merge info to the last layer
+    mean_layers = torch.mean(fused_base[:, :4, :, :], dim=1, keepdim=True) 
+    fused_base[:, -1:, :, :] = mean_layers
     fused_base = msd_resample(fused_base)
     fused_detail = msd_resample(fused_detail)
     fused_pyr = copy.deepcopy(ir_pyr)
@@ -222,6 +225,7 @@ def fusion(
 
     # 重构图像 - 下采样 + 恢复成 RGB
     fused = reconstruction(fused_base, fused_detail, ir_pyr, vis_ycbcr)
+    # fused = reconstruction(fused_base, torch.zeros_like(fused_detail), ir_pyr, vis_ycbcr)
     
     return fused
 
@@ -280,8 +284,9 @@ def test(**kwargs) -> None:
     
     ir = to_tensor(ir).unsqueeze(0).to(opts.device)
     vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+    fused = fusion(ir, vis, kwargs['layer'], debug=False)
 
-    glance([ir,vis,fusion(ir, vis, kwargs['layer'], debug=True)],title=['ir','vis','fused'],auto_contrast=False,clip=True,each_save=True,each_save_dir="./glance_outputs/final")
+    # glance([ir,vis,fusion(ir, vis, kwargs['layer'], debug=False)],title=['ir','vis','fused'],auto_contrast=False,clip=True,each_save=False,each_save_dir="./glance_outputs/final")
     # save_array_to_img(fusion(ir, vis, kwargs['layer'], debug=False), filename=f'/Volumes/Charles/data/vision/torchvision/tno/tno/fused/cpfusion/{image_index}.png')
 
 
@@ -472,7 +477,7 @@ def test_msrs(**kwargs) -> None:
         ir = to_tensor(ir).unsqueeze(0).to(opts.device)
         vis = to_tensor(vis).unsqueeze(0).to(opts.device)
         fused = fusion(ir, vis, kwargs['layer'], debug=False)
-        name = Path(opts.p) / 'test' / 'fused' / 'cpfusion' / i.name
+        name = Path(opts.p) / 'test' / 'fused' / 'cpfusion_m' / i.name
         print(f"Saving {name}")
         save_array_to_img(fused, name, True)
 
@@ -644,7 +649,7 @@ def ablation(**kwargs):
     fused_without_pam_tno = fusion(ir, vis, kwargs['layer'], attension='None', debug=False)
     fused_pam_tno = fusion(ir, vis, kwargs['layer'], attension='DSimAM', debug=False)
 
-    llvip_index = 190190
+    llvip_index = 190015
     ir_llvip = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/llvip/infrared/test/{llvip_index}.jpg')
     vis_llvip = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/llvip/visible/test/{llvip_index}.jpg')
     ir_llvip = to_tensor(ir_llvip).unsqueeze(0).to(opts.device)
@@ -660,7 +665,7 @@ def ablation(**kwargs):
             [fused_cc_llvip, fused_max_llvip, fused_cc_max_llvip],
             shape = (2,3),
             each_save = True,
-            each_save_dir = "./glance_outputs/ablantion/1"
+            each_save_dir = "./assets/glance_outputs/ablantion/1"
         )
 
     glance(
@@ -668,7 +673,7 @@ def ablation(**kwargs):
             [fused_without_pam_llvip, fused_pam_llvip],
             shape = (2,2),
             each_save = True,
-            each_save_dir = "./glance_outputs/ablantion/2"
+            each_save_dir = "./assets/glance_outputs/ablantion/2"
         )
 
     
@@ -677,7 +682,7 @@ if __name__ == '__main__':
     # test()
     # test_tno()
     # test_llvip()
-    # test_msrs()
+    test_msrs()
     # test_m3fd()
     # ablation()
     # test_tno_ablation_pam()

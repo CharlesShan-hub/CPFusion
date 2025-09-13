@@ -25,8 +25,17 @@ default_ir_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/ir"
 default_vis_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/vi"
 default_fused_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/fused"
 default_db_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/fused"
-default_db_name = "metrics.db"
+# default_db_name = "metrics.db"
+default_db_name = "cpfusion_m.db"
 default_suffix = "png"
+
+# Path - m3fd
+# default_ir_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/ir"
+# default_vis_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/vis"
+# default_fused_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/fused"
+# default_db_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/fused"
+# default_db_name = "cpfusion_m.db"
+# default_suffix = "png"
 
 # Fusion Images
 # 1. Calculare all images in each fused_dir
@@ -40,7 +49,7 @@ defaulf_img_id = ()
 # default_algorithms = () 
 # 2. `fused_dir` is the parent dir of all algorithms
 # default_algorithms = ('cpfusion','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
-default_algorithms = ('tardal',)
+default_algorithms = ('cpfusion_m',)
 
 # Metrics
 # default_metrics = ['pfe']

@@ -36,31 +36,34 @@ def msd_resample(tensor):
     return images
 
 def correlation_coefficient_weights(X, Y):
-    # correlation
+    # correlation (-n, n)
     cov_XY = torch.mean((X - X.mean(dim=(2, 3), keepdim=True)) * (Y - Y.mean(dim=(2, 3), keepdim=True)))
 
-    # variation
+    # variation (n)
     var_X = torch.var(X, dim=(2, 3), keepdim=True)
     var_Y = torch.var(Y, dim=(2, 3), keepdim=True)
     
-    # correlation coefficient
-    V_CC = cov_XY / torch.sqrt(var_X * var_Y)
+    # correlation coefficient (-1, 1)
+    V_CC = cov_XY / torch.sqrt(var_X * var_Y) 
     
     # weights
+    # W_CC = torch.where(V_CC > 0, 1 - torch.exp(-V_CC), torch.exp(V_CC) - 1)
     W_CC = torch.where(V_CC > 0, 1 - torch.exp(-V_CC), torch.exp(V_CC) - 1)
     
     return W_CC
 
 def _base_layer_fuse(X, Y, wcc):
     weight = 1.5 ** ((wcc + 1) / 2)
-    weight = torch.clamp(weight, 0, 1) # Add this
+    # weight = torch.clamp(weight, 0, 1) # Remove this
+    weight = weight - 1 # Changed to this
     fused = torch.zeros_like(X)
-    # print(weight, 1-weight)
     weighted_X = weight * X
     weighted_Y = (1 - weight) * Y
     fused[:, ::2, :, :] = torch.max(X, Y)[:, ::2, :, :]
     fused[:,1::2, :, :] = (weighted_X + weighted_Y)[:,1::2, :, :]
-
+    # glance([_c(fused[:,0:1,:,:]),_c(fused[:,1:2,:,:]),_c(fused[:,2:3,:,:]),_c(fused[:,3:4,:,:])])
+    # glance([_c(torch.max(X, Y)[:,0:1,:,:]), _c((weighted_X + weighted_Y)[:,0:1,:,:]), _c(X[:,0:1,:,:]), _c(Y[:,0:1,:,:])])
+    # breakpoint()
     return fused
     # return fused.mean(dim=1,keepdim=True)
 

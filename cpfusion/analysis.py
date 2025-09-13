@@ -3,9 +3,13 @@ import json
 from cslib.utils.config import Options
 from cslib.metrics.fusion.utils import Database
 
+# Paths - msrs
+default_db_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/fused"
+default_db_name = "cpfusion_m.db"
+
 # Paths - m3fd
-# default_db_dir = "/Users/kimshan/Public/data/vision/torchvision/m3fd/fused"
-# default_db_name = "metrics.db"
+# default_db_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/fused"
+# default_db_name = "cpfusion.db"
 
 # Paths - llvip
 # default_db_dir = "/Volumes/Charles/data/vision/torchvision/llvip/fused"
@@ -15,9 +19,8 @@ from cslib.metrics.fusion.utils import Database
 # default_db_name = "ce.db"
 
 # Paths - tno
-default_db_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/fused"
+# default_db_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/fused"
 # default_db_name = "metrics.db"
-default_db_name = "crossfuse.db"
 
 # Fusion Images
 # 1. Calculare all images in each fused_dir
@@ -38,7 +41,7 @@ default_img_id = ()
 # default_algorithms = ('SceneFuse','GTF','SDCFusion','DATFuse','VSMWLS','HMSD')
 # default_algorithms = ('cpfusion','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
 # default_algorithms = ('cpfusion','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
-default_algorithms = ('crossfuse',)
+default_algorithms = ('cpfusion_m',)
 # default_algorithms = ('cpfusion','cpfusion_wp','cpfusion_cc','cpfusion_max','datfuse','fpde','fusiongan','gtf','ifevip','piafusion','stdfusion','tardal')
 # default_algorithms = ('cpfusion','cpfusion_max','cpfusion_cc')
 
