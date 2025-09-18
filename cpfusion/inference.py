@@ -529,7 +529,7 @@ def test_msrs_ablation_max(**kwargs) -> None:
 @click.option("--device", type=str, default='auto')
 def test_msrs_ablation_cc(**kwargs) -> None:
     kwargs['device'] = get_device(kwargs['device'])
-    opts = Options('CPFusion CC ablation MSRS', kwargs)
+    opts = Options('CPFusion CC ablation MSRS', kwargs) 
     opts.present()
     for i in (Path(opts.p) / 'test' / 'ir').glob("*.png"):
         ir = path_to_gray(i)

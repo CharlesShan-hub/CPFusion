@@ -55,12 +55,11 @@ def correlation_coefficient_weights(X, Y):
 def _base_layer_fuse(X, Y, wcc):
     weight = 1.5 ** ((wcc + 1) / 2)
     # weight = torch.clamp(weight, 0, 1) # Remove this
-    weight = weight - 1 # Changed to this
     fused = torch.zeros_like(X)
     weighted_X = weight * X
-    weighted_Y = (1 - weight) * Y
+    weighted_Y = (2 - weight) * Y# Changed to this
     fused[:, ::2, :, :] = torch.max(X, Y)[:, ::2, :, :]
-    fused[:,1::2, :, :] = (weighted_X + weighted_Y)[:,1::2, :, :]
+    fused[:,1::2, :, :] = (weighted_X + weighted_Y)[:,1::2, :, :]/2 # Changed to this
     # glance([_c(fused[:,0:1,:,:]),_c(fused[:,1:2,:,:]),_c(fused[:,2:3,:,:]),_c(fused[:,3:4,:,:])])
     # glance([_c(torch.max(X, Y)[:,0:1,:,:]), _c((weighted_X + weighted_Y)[:,0:1,:,:]), _c(X[:,0:1,:,:]), _c(Y[:,0:1,:,:])])
     # breakpoint()
