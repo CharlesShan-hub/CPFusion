@@ -10,30 +10,52 @@ import matplotlib
 # https://matplotlib.org/stable/users/explain/figure/backends.html
 matplotlib.use('macosx')
 
+# Paths - tno
+# default_ir_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/ir"
+# default_vis_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/vis"
+# default_fused_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/fused"
+# default_res_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/fused"
+# default_res_name = "image3.png"
+# default_img_id = ('34','35','39','19')
+# default_img_pos = ((243, 203, 50),(243, 203, 80),(233, 330, 70),(106, 285, 95))#,(106, 215, 60)
+# default_suffix = 'png'
+
 # Paths - llvip
 # default_ir_dir = "/Volumes/Charles/data/vision/torchvision/llvip/infrared/test"
 # default_vis_dir = "/Volumes/Charles/data/vision/torchvision/llvip/visible/test"
 # default_fused_dir = "/Volumes/Charles/data/vision/torchvision/llvip/fused"
 # default_res_dir = "/Volumes/Charles/data/vision/torchvision/llvip/fused"
 # default_res_name = "image2.png"
-
-# Paths - tno
-default_ir_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/ir"
-default_vis_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/vis"
-default_fused_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/fused"
-default_res_dir = "/Volumes/Charles/data/vision/torchvision/tno/tno/fused"
-default_res_name = "image3.png"
-
-# Fusion Images - Calculare for specified images
 # default_img_id = ('190015','200034','210070','260396')
-default_img_id = ('34','35','39','41')
+# default_img_pos = ((50,210,120),(590,525,70),(403,706,100),(700,485,25),(700,490,20))
+# default_suffix = 'jpg'
 
-# Fusion Images Detail Part Info -> (x,y,w)
-default_img_pos = ((243, 203, 50),(243, 203, 80),(233, 330, 70),(106, 215, 60))
-# default_img_pos = ((700,480,60),(590,525,70),(403,706,100),(700,485,25),(700,490,20))
+# Paths - m3fd
+# default_ir_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/ir"
+# default_vis_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/vis"
+# default_fused_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/fused"
+# default_res_dir = "/Volumes/Charles/data/vision/torchvision/m3fd/fusion/fused"
+# default_res_name = "image3.png"
+# default_img_id = ('00587','01299','00878','00512')
+# default_img_pos = ((19,360,75),(270,350,50),(235,290,100),(220,385,100))
+# default_suffix = 'png'
+
+
+# Paths - msrs
+default_ir_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/ir"
+default_vis_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/vi"
+default_fused_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/fused"
+default_res_dir = "/Volumes/Charles/data/vision/torchvision/msrs/test/fused"
+default_res_name = "image4.png"
+default_img_id = ('00032N','00581D','00838N','00303D')
+default_img_pos = ((154,177,80),(130,130,140),(100,180,90),(150,61,50))
+default_suffix = 'png'
+
+
+
 
 # Fusion Algorithms - `fused_dir` is the parent dir of all algorithms
-default_algorithms = ('tardal','stdfusion','piafusion','ifevip','gtf','fusiongan','fpde','datfuse','cpfusion')
+default_algorithms = ('tardal','stdfusion','piafusion','ifevip','gtf','fusiongan','fpde','datfuse','comofusion','crossfuse','cpfusion_m')
 # default_algorithms = ('cpfusion',)
 
 @click.command()
@@ -44,7 +66,7 @@ default_algorithms = ('tardal','stdfusion','piafusion','ifevip','gtf','fusiongan
 @click.option('--img_id', default=default_img_id, multiple=True, help='draw for specified images')
 @click.option('--img_pos', default=default_img_pos, multiple=True, help='draw for specified images')
 @click.option('--corner', default='SE',help='NW | NE | SW | SE')
-@click.option('--suffix', default="png")
+@click.option('--suffix', default=default_suffix, help='Suffix of image file.')
 @click.option('--window_size', default=0.4)
 @click.option('--thickness', default=8)
 @click.option('--res_dir', default=default_res_dir, help='Path to save image.')

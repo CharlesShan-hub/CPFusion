@@ -309,7 +309,7 @@ def test_tno(**kwargs) -> None:
         ir = to_tensor(ir).unsqueeze(0).to(opts.device)
         vis = to_tensor(vis).unsqueeze(0).to(opts.device)
         fused = fusion(ir, vis, kwargs['layer'], debug=False)
-        name = Path(opts.p) / 'fused' / 'cpfusion' / i.name
+        name = Path(opts.p) / 'fused' / 'cpfusion_m' / i.name
         print(f"Saving {name}")
         save_array_to_img(fused, name, True)
 
@@ -393,7 +393,7 @@ def test_llvip(**kwargs) -> None:
         ir = to_tensor(ir).unsqueeze(0).to(opts.device)
         vis = to_tensor(vis).unsqueeze(0).to(opts.device)
         fused = fusion(ir, vis, kwargs['layer'], debug=False)
-        name = Path(opts.p) / 'fused' / 'cpfusion' / i.name
+        name = Path(opts.p) / 'fused' / 'cpfusion_m' / i.name
         print(f"Saving {name}")
         save_array_to_img(fused, name, True)
 
@@ -561,7 +561,26 @@ def test_m3fd(**kwargs) -> None:
         ir = to_tensor(ir).unsqueeze(0).to(opts.device)
         vis = to_tensor(vis).unsqueeze(0).to(opts.device)
         fused = fusion(ir, vis, kwargs['layer'], debug=False)
-        name = Path(opts.p) / 'fusion' / 'fused' / 'cpfusion' / i.name
+        name = Path(opts.p) / 'fusion' / 'fused' / 'cpfusion_m' / i.name
+        print(f"Saving {name}")
+        save_array_to_img(fused, name, True)
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/m3fd/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_m3fd_detection(**kwargs) -> None:
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion M3FD', kwargs)
+    opts.present()
+    for i in (Path(opts.p) / 'detection' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'detection' / 'vi' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        fused = fusion(ir, vis, kwargs['layer'], debug=False)
+        name = Path(opts.p) / 'detection' / 'fused' / 'cpfusion' / i.name
         print(f"Saving {name}")
         save_array_to_img(fused, name, True)
 
@@ -676,14 +695,148 @@ def ablation(**kwargs):
             each_save_dir = "./assets/glance_outputs/ablantion/2"
         )
 
+
+
+#########################################################################################################
+#                                            Time                                                       #
+#########################################################################################################
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/tno/tno")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_tno_time(**kwargs):
+    import time
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion TNO Time', kwargs)
+    opts.present()
+    
+    total_time = 0.0
+    count = 0
+    
+    for i in (Path(opts.p) / 'ir').glob("*.png"):
+        ir = to_tensor(path_to_gray(i)).to(opts.device)
+        vis = path_to_rgb(Path(opts.p) / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        start_time = time.time()
+        fused = fusion(ir, vis, kwargs['layer'], debug=False)
+        end_time = time.time()
+        total_time += (end_time - start_time)
+        count += 1
+    
+    avg_time = total_time / count
+    print(f"总处理图像数量: {count}")
+    print(f"总耗时: {total_time:.4f} 秒")
+    print(f"平均每张图像融合时间: {avg_time:.4f} 秒")
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/llvip")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_llvip_time(**kwargs):
+    import time
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion LLVIP Time', kwargs)
+    opts.present()
+    
+    total_time = 0.0
+    count = 0 
+    
+    for i in (Path(opts.p) / 'infrared' / 'test').glob("*.jpg"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'visible' / 'test' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        start_time = time.time()
+        fusion(ir, vis, kwargs['layer'], debug=False)
+        end_time = time.time()
+        total_time += (end_time - start_time)
+        count += 1
+    
+    if count > 0:
+        avg_time = total_time / count
+        print(f"总处理图像数量: {count}")
+        print(f"总耗时: {total_time:.4f} 秒")
+        print(f"平均每张图像融合时间: {avg_time:.4f} 秒")
+
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/msrs/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_msrs_time(**kwargs):
+    import time
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion MSRS Time', kwargs)
+    opts.present()
+    
+    total_time = 0.0
+    count = 0
+    
+    for i in (Path(opts.p) / 'test' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'test' / 'vi' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        start_time = time.time()
+        fusion(ir, vis, kwargs['layer'], debug=False)
+        end_time = time.time()
+        total_time += (end_time - start_time)
+        count += 1
+    
+    if count > 0:
+        avg_time = total_time / count
+        print(f"总处理图像数量: {count}")
+        print(f"总耗时: {total_time:.4f} 秒")
+        print(f"平均每张图像融合时间: {avg_time:.4f} 秒")
+    
+
+@click.command()
+@click.option("--p", type=str, default="/Volumes/Charles/data/vision/torchvision/m3fd/")
+@click.option("--layer", type=int, default=4)
+@click.option("--msd_method", type=str, default=['Laplacian','Contrust'][0])
+@click.option("--device", type=str, default='auto')
+def test_m3fd_time(**kwargs):
+    import time
+    kwargs['device'] = get_device(kwargs['device'])
+    opts = Options('CPFusion M3FD Time', kwargs)
+    opts.present()
+    
+    total_time = 0.0
+    count = 0
+    
+    for i in (Path(opts.p) / 'fusion' / 'ir').glob("*.png"):
+        ir = path_to_gray(i)
+        vis = path_to_rgb(Path(opts.p) / 'fusion' / 'vis' / i.name)
+        ir = to_tensor(ir).unsqueeze(0).to(opts.device)
+        vis = to_tensor(vis).unsqueeze(0).to(opts.device)
+        start_time = time.time()
+        fused = fusion(ir, vis, kwargs['layer'], debug=False)
+        end_time = time.time()
+        total_time += (end_time - start_time)
+        count += 1
+    
+    if count > 0:
+        avg_time = total_time / count
+        print(f"总处理图像数量: {count}")
+        print(f"总耗时: {total_time:.4f} 秒")
+        print(f"平均每张图像融合时间: {avg_time:.4f} 秒")
+
     
 if __name__ == '__main__':
     # main()
     # test()
     # test_tno()
     # test_llvip()
-    test_msrs()
+    # test_msrs()
     # test_m3fd()
+    test_m3fd_detection()
     # ablation()
     # test_tno_ablation_pam()
     # test_tno_ablation_cc()
@@ -697,3 +850,7 @@ if __name__ == '__main__':
     # test_m3fd_ablation_pam()
     # test_m3fd_ablation_cc()
     # test_m3fd_ablation_max()
+    # test_tno_time()
+    # test_llvip_time()
+    # test_msrs_time()
+    # test_m3fd_time()

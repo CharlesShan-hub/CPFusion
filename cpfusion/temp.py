@@ -264,24 +264,32 @@ def test(**kwargs) -> None:
     # ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/llvip/infrared/test/{image_index}.jpg')
     # vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/llvip/visible/test/{image_index}.jpg')
 
-    # image_index = 20
-    # ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/tno/tno/ir/{image_index}.png')
-    # vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/tno/tno/vis/{image_index}.png')
+    image_index = 20
+    ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/tno/tno/ir/{image_index}.png')
+    vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/tno/tno/vis/{image_index}.png')
 
     # image_index = '00947N'
     # ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/msrs/test/ir/{image_index}.png')
     # vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/msrs/test/vi/{image_index}.png')
 
-    image_index = '00388'
-    ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/m3fd/fusion/ir/{image_index}.png')
-    vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/m3fd/fusion/vis/{image_index}.png')
+    # image_index = '00388'
+    # ir = path_to_gray(f'/Volumes/Charles/data/vision/torchvision/m3fd/fusion/ir/{image_index}.png')
+    # vis = path_to_rgb(f'/Volumes/Charles/data/vision/torchvision/m3fd/fusion/vis/{image_index}.png')
 
     ir = to_tensor(ir).unsqueeze(0).to(opts.device)
     vis = to_tensor(vis).unsqueeze(0).to(opts.device)
-    fused_cc_max = fusion(ir, vis, kwargs['layer'], debug=False)
-    fused_cc = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='CC')
-    fused_max = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='MAX')
-    glance([ir,vis,fused_cc_max,fused_cc,fused_max],title=['ir','vis','fused_cc_max','fused_cc','fused_max'],auto_contrast=False,clip=True,each_save=True,each_save_dir=f"./assets/glance_outputs/cc_max_ablation/{image_index}")
+
+    # Save cc max cc_max
+    # fused_cc_max = fusion(ir, vis, kwargs['layer'], debug=False)
+    # fused_cc = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='CC')
+    # fused_max = fusion(ir, vis, kwargs['layer'], debug=False, fusion_method='MAX')
+    # glance([ir,vis,fused_cc_max,fused_cc,fused_max],title=['ir','vis','fused_cc_max','fused_cc','fused_max'],auto_contrast=False,clip=True,each_save=True,each_save_dir=f"./assets/glance_outputs/cc_max_ablation/{image_index}")
+    
+    # Save pam y/n
+    fused_withpam = fusion(ir, vis, kwargs['layer'], debug=False)
+    fused_withoutpam = fusion(ir, vis, kwargs['layer'], debug=False, attension=['SimAM','DSimAM','None'][2])
+    breakpoint()
+    glance([ir,vis,fused_withpam,fused_withoutpam],title=['ir','vis','fused_withpam','fused_withoutpam'],auto_contrast=False,clip=True,each_save=True,each_save_dir=f"./assets/glance_outputs/pam_ablation/{image_index}")
 
     # glance([ir,vis,fusion(ir, vis, kwargs['layer'], debug=False)],title=['ir','vis','fused'],auto_contrast=False,clip=True,each_save=False,each_save_dir="./glance_outputs/final")
     # save_array_to_img(fusion(ir, vis, kwargs['layer'], debug=False), filename=f'/Volumes/Charles/data/vision/torchvision/tno/tno/fused/cpfusion/{image_index}.png')
